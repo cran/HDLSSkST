@@ -632,7 +632,7 @@ Rcpp::NumericMatrix rctab(Rcpp::NumericMatrix M)
     
     fact[0] = fact[1] = 0.0;
   for(i = 2; i <= ntotal; i++)
-    fact[i] = fact[i - 1] + log(i);    
+    fact[i] = fact[i - 1] + log((double)(i));    
   
   /*  Construct a random matrix.*/
     

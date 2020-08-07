@@ -2,8 +2,8 @@ Package: HDLSSkST
 Type: Package
 Title: Distribution-Free Exact High Dimensional Low Sample Size
         k-Sample Tests
-Version: 1.0
-Date: 2020-07-30
+Version: 1.0.1
+Date: 2020-08-05
 Authors@R: c(person("Biplab", "Paul", role = c("aut", "cre"), email = "biplab.paul@niser.ac.in"),
     person("Shyamal K.", "De", role = c("aut")),
     person("Anil K.", "Ghosh", role = c("aut")))
@@ -25,6 +25,6 @@ Author: Biplab Paul [aut, cre],
   Shyamal K. De [aut],
   Anil K. Ghosh [aut]
 NeedsCompilation: yes
-Packaged: 2020-07-30 14:09:05 UTC; GOBINDO
+Packaged: 2020-08-05 14:22:18 UTC; GOBINDO
 Repository: CRAN
-Date/Publication: 2020-08-04 10:42:07 UTC
+Date/Publication: 2020-08-07 09:42:15 UTC

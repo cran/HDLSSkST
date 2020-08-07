@@ -1,4 +1,4 @@
-29688c1f5662bb8a8da7f1ae51c3a296 *DESCRIPTION
+9a2f6f57004f956f213ec624cf105cb6 *DESCRIPTION
 bb76f640687d8b66a2fa912c52d9f745 *NAMESPACE
 566c4127141dd23a7cbb410d98d4103a *R/RcppExports.R
 421aaf6e39b921cbe91d9941b47ee830 *R/Rks_test.R
@@ -13,4 +13,4 @@ ada3849aeac3274f3ed93b46f816018f *man/RItest.Rd
 0176325baf2c55ac124ff941b42c93e7 *man/randfun.Rd
 bda68d17c65362e26d73f2f00347f24d *man/rctab.Rd
 93d1766218e0130383b6f1242109eac3 *src/RcppExports.cpp
-25cbd9bb98afecd01634eb1c483bfc88 *src/clust_ct.cpp
+b11e08965b0fa8a8746bf064ebf73980 *src/clust_ct.cpp
