@@ -1,7 +1,8 @@
 \name{randfun}
 \alias{randfun}
+%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-       Rand Index
+Rand Index
 }
 \description{
 Measures to compare the dissimilarity of exact cluster labels (memberships) and estimated cluster labels (memberships) of the observations.
@@ -9,11 +10,18 @@ Measures to compare the dissimilarity of exact cluster labels (memberships) and 
 \usage{
 randfun(lvel, dv)
 }
+%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{lvel}{exact cluster labels of the observations }
-  \item{dv}{estimated cluster labels of the observations}
+  \item{lvel}{
+exact cluster labels of the observations
 }
+  \item{dv}{
+estimated cluster labels of the observations
+}
+}
+
 \value{
+%%  ~Describe the value returned
 a single value between 0 and 1
 }
 \references{

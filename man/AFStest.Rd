@@ -1,14 +1,14 @@
-\name{ARItest}
-\alias{ARItest}
+\name{AFStest}
+\alias{AFStest}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-k-Sample ARI Test of Equal Distributions
+k-Sample AFS Test of Equal Distributions
 }
 \description{
-Performs the distribution free exact k-sample test for equality of multivariate distributions in the HDLSS regime. This an aggregate test of the two sample versions of the RI test over \eqn{\frac{k(k-1)}{2}} numbers of two-sample comparisons, and the test statistic is the minimum of these two sample RI test statistics. Holm's step-down-procedure (1979) and Benjamini-Hochberg procedure (1995) are applied for multiple testing.
+Performs the distribution free exact k-sample test for equality of multivariate distributions in the HDLSS regime. This an aggregate test of the two sample versions of the FS test over \eqn{\frac{k(k-1)}{2}} numbers of two-sample comparisons, and the test statistic is the minimum of these two sample FS test statistics. Holm's step-down-procedure (1979) and Benjamini-Hochberg procedure (1995) are applied for multiple testing.
 }
 \usage{
-ARItest(M, sizes, randomization = TRUE, clust_alg = "knwClustNo", kmax = 4, 
+AFStest(M, sizes, randomization = TRUE, clust_alg = "knwClustNo", kmax = 4,
 multTest = "Holm", s_psi = 1, s_h = 1, lb = 1, n_sts = 1000, alpha = 0.05)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -50,18 +50,19 @@ numeric, confidence level \eqn{\alpha}, default: \eqn{0.05}
 
 \value{
 %%  ~Describe the value returned
-   ARItest returns a list containing the following items:
-  \item{ARIStat}{value of the observed test statistic}
-  \item{Cutoff}{cut-off of the test}
+   AFStest returns a list containing the following items:
+  \item{AFSStat}{value of the observed test statistic}
+  \item{AFCutoff}{cut-off of the test}
   \item{randomGamma}{randomized coefficient of the test}
-  \item{decisionARI}{if returns \eqn{1}, reject the null hypothesis and if returns \eqn{0}, fails to reject the null hypothesis}
+  \item{decisionAFS}{if returns \eqn{1}, reject the null hypothesis and if returns \eqn{0}, fails to reject the null hypothesis}
   \item{multipleTest}{indicates where two populations are different according to multiple tests}
+
 }
 \references{
 Biplab Paul, Shyamal K De and Anil K Ghosh (2020).  Some clustering based exact distribution-free k-sample tests
 applicable to high dimension, low sample size data.
 
-William M Rand (1971). Objective criteria for the evaluation of clustering methods, \emph{Journal of the American Statistical association}, 66(336):846-850, doi:10.1080/01621459.1971.10482356.
+Cyrus R Mehta and Nitin R Patel (1983). A network algorithm for performing Fisher's exact test in rxc contingency tables, \emph{Journal of the American Statistical Association}, 78(382):427-434, doi:10.2307/2288652.
 
 Sture Holm (1979). A simple sequentially rejective multiple test procedure, \emph{Scandinavian journal of statistics}, 65-70, doi:10.2307/4615733.
 
@@ -82,20 +83,20 @@ Maintainer: Biplab Paul<biplab.paul@niser.ac.in>
   I3 <- matrix(rnorm(n3*d,mean=1,sd=1),n3,d) 
   I4 <- matrix(rnorm(n4*d,mean=1.5,sd=1),n4,d) 
   X <- as.matrix(rbind(I1,I2,I3,I4)) 
-  #ARI test:
-  results <- ARItest(M=X, sizes = c(n1,n2,n3,n4))
+  #AFS test:
+  results <- AFStest(M=X, sizes = c(n1,n2,n3,n4))
   
    ## outputs:
-   results$ARIStat
-   #[1] 0
+   results$AFSStat
+   #[1] 5.412544e-06
 
-   results$ARICutoff
-   #[1] 0.3368421
+   results$AFCutoff
+   #[1] 0.0109604
 
    results$randomGamma
    #[1] 0
 
-   results$decisionARI
+   results$decisionAFS
    #[1] 1
 
    results$multipleTest
@@ -108,4 +109,4 @@ Maintainer: Biplab Paul<biplab.paul@niser.ac.in>
    #6            3            4     TRUE       0
 
 }
-\keyword{ ARItest function}
+\keyword{ AFStest function}

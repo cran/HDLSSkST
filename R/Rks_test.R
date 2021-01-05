@@ -9,6 +9,7 @@ randfun <- function(lvel, dv) {
   ada/tnp
 }
 # ------------------------------------------------------------------------------------
+
 #----------------------------pmf of G-hyg distribution--------------------------------
 pmf <- function(M){
   cols <- colSums(M)
@@ -18,9 +19,52 @@ pmf <- function(M){
 }
 #-------------------------------------------------------------------------------------
 
+#------------------- Holm (1979) test------------------------------------------------
+
+Holm <- function(pvalues, alpha){
+  n_hypo <- length(pvalues)
+  criticalValues <- sapply(1:n_hypo, function(i) alpha/(n_hypo-i+1))
+  sorted <- sort(pvalues)
+  rejected <- (sorted < criticalValues)
+  orp <- as.vector(order(pvalues))
+  
+  if(sum(rejected)==n_hypo){
+    output <- as.numeric(rejected)
+    return(output)
+  }
+  else{
+    FF <- which(rejected==FALSE)
+    rejected[min(FF):n_hypo] <- FALSE 
+    output <- as.numeric(rejected[order(orp)])
+    return(output)
+  }
+}
+#-----------------------------------------------------------------------------------
+
+#-----------------Benjamini-Hochberg (1995) test------------------------------------
+
+BenHoch <- function(pvalues, alpha){ 
+  n_hypo <- length(pvalues)
+  criticalValues <- sapply(1:n_hypo, function(i) (i/n_hypo)*alpha)
+  sorted <- sort(pvalues)
+  rejected <-  (sorted <= criticalValues)
+  orp <- as.vector(order(pvalues))
+  
+  if(sum(rejected)==0){
+    output <- as.numeric(rejected)
+    return(output)
+  }
+  else{
+    FT <- which(rejected==TRUE)
+    rejected[1:max(FT)] <- TRUE 
+    output <- as.numeric(rejected[order(orp)])
+    return(output)
+  }
+}
+#-----------------------------------------------------------------------------------
 
 # ------------------------------------rand_index_test-----------------------------------------------------------
-RItest <- function(M, labels, sizes, randomization = TRUE, clust_alg = "knwClustNo", s_fn = 1, lb = 1, n_sts = 1000, alpha = 0.05){
+RItest <- function(M, labels, sizes, n_clust, randomization = TRUE, clust_alg = "knwClustNo", kmax = 2*n_clust, s_psi = 1, s_h = 1, lb = 1, n_sts = 1000, alpha = 0.05){
   if(is.data.frame(M))
     M <- as.matrix(M)
   if(!is.numeric(M) || !is.numeric(labels) || !is.numeric(sizes) || anyNA(M) || anyNA(labels) || anyNA(sizes))
@@ -30,14 +74,12 @@ RItest <- function(M, labels, sizes, randomization = TRUE, clust_alg = "knwClust
   if(nrow(M)!=length(labels)||length(labels)!=sum(sizes))
     stop("Number of observations and number of membership of observations must be same")
   N <- nrow(M)
-  # d <- ncol(M)
-  n_clust <- length(sizes)
   if(clust_alg=="knwClustNo"){
-    dvec <- as.numeric(gMADD(s_fn, n_clust, lb, M))
+    dvec <- as.numeric(gMADD(s_psi, s_h, n_clust, lb, M))
   }
   else if(clust_alg=="estClustNo"){
-    maxClNo <- 2*n_clust
-    dvec_di_mat <- as.matrix(gMADD_DI(s_fn, maxClNo, lb, M)) 
+    # maxClNo <- 2*n_clust
+    dvec_di_mat <- as.matrix(gMADD_DI(s_psi, s_h, kmax, lb, M)) 
     est_no_cl <- which.max(dvec_di_mat[ ,(N+1)])
     dvec <- dvec_di_mat[est_no_cl,1:N]
   }
@@ -104,7 +146,7 @@ RItest <- function(M, labels, sizes, randomization = TRUE, clust_alg = "knwClust
 # ------------------------------------------------------------------------------------------------
 
 # ------------------------------Fisher_Exact_Independence_test------------------------------------------------------
-FEItest <- function(M, labels, sizes, randomization = TRUE, clust_alg = "knwClustNo", s_fn = 1, lb = 1, n_sts = 1000, alpha = 0.05){
+FStest <- function(M, labels, sizes, n_clust, randomization = TRUE, clust_alg = "knwClustNo", kmax = 2*n_clust, s_psi = 1, s_h = 1, lb = 1, n_sts = 1000, alpha = 0.05){
   if(is.data.frame(M))
     M <- as.matrix(M)
   if(!is.numeric(M) || !is.numeric(labels) || !is.numeric(sizes) || anyNA(M) || anyNA(labels) || anyNA(sizes))
@@ -114,14 +156,12 @@ FEItest <- function(M, labels, sizes, randomization = TRUE, clust_alg = "knwClus
   if(nrow(M)!=length(labels)||length(labels)!=sum(sizes))
     stop("Number of observations and number of membership of observations must be same")
   N <- nrow(M)
-  # d <- ncol(M)
-  n_clust <- length(sizes)
   if(clust_alg=="knwClustNo"){
-    dvec <- as.numeric(gMADD(s_fn, n_clust, lb, M))
+    dvec <- as.numeric(gMADD(s_psi, s_h, n_clust, lb, M))
   }
   else if(clust_alg=="estClustNo"){
-    maxClNo <- 2*n_clust
-    dvec_di_mat <- as.matrix(gMADD_DI(s_fn, maxClNo, lb, M)) 
+    # maxClNo <- 2*n_clust
+    dvec_di_mat <- as.matrix(gMADD_DI(s_psi, s_h, kmax, lb, M)) 
     est_no_cl <- which.max(dvec_di_mat[ ,(N+1)])
     dvec <- dvec_di_mat[est_no_cl,1:N]
   }
@@ -134,7 +174,7 @@ FEItest <- function(M, labels, sizes, randomization = TRUE, clust_alg = "knwClus
     fsim_pmf[j] <- pmf(fsc_tab)
   }
   
-  pvalue_FEI <- mean(fsim_pmf<=fpmf)
+  pvalue_FS <- mean(fsim_pmf<=fpmf)
   # f_alpha <- as.numeric(quantile(fsim_pmf, alpha))
   f_alpha <- sort(fsim_pmf)[floor(alpha*n_sts)]
   decfisher <- 0
@@ -169,7 +209,7 @@ FEItest <- function(M, labels, sizes, randomization = TRUE, clust_alg = "knwClus
     output$ObservedProb <- fpmf
     output$FCutoff <- f_alpha
     output$randomGamma <- fgamma
-    output$estPvalue <- pvalue_FEI
+    output$estPvalue <- pvalue_FS
     output$decisionF <- decfisher
   }
   else if(clust_alg=="estClustNo"){
@@ -179,7 +219,7 @@ FEItest <- function(M, labels, sizes, randomization = TRUE, clust_alg = "knwClus
     output$ObservedProb <- fpmf
     output$FCutoff <- f_alpha
     output$randomGamma <- fgamma
-    output$estPvalue <- pvalue_FEI
+    output$estPvalue <- pvalue_FS
     output$decisionF <- decfisher
   }
   return(output)
@@ -187,8 +227,84 @@ FEItest <- function(M, labels, sizes, randomization = TRUE, clust_alg = "knwClus
 
 # ------------------------------------------------------------------------------------------
 
+# ------------------------------Multiple_test_rand_index_test------------------------------------
+MTRItest <- function(M, labels, sizes, k_max, multTest = "Holm", s_psi = 1, s_h = 1, lb = 1, n_sts = 1000, alpha = 0.05){
+  n_hypo <- (k_max-1)
+  ri_vec <- rep(0, n_hypo)
+  p_values_vec <- rep(0, n_hypo)
+  contingenyTabs <- list()
+  for (i in 1:n_hypo) {
+    testFun <- RItest(M, labels, sizes, n_clust = (i+1), randomization = TRUE, clust_alg = "knwClustNo", kmax = 2*(i+1), s_psi, s_h, lb, n_sts, alpha)
+    ri_vec[i] <- testFun$ObservedRI
+    p_values_vec[i] <- testFun$estPvalue
+    contingenyTabs[[i]] <- testFun$obsCtyTab 
+  }
+  
+  dec_mtri <- 0
+  if(multTest=="Holm"){
+    multest_dec <- Holm(p_values_vec,alpha)
+    if(sum(multest_dec)!=0){
+      dec_mtri <- 1
+    }
+  }
+  else if(multTest=="BenHoch"){
+    multest_dec <- BenHoch(p_values_vec, alpha)
+    if(sum(multest_dec) != 0){
+      dec_mtri <- 1
+    }
+  }
+  
+    output<-list()
+    
+    output$RIvec <- ri_vec
+    output$Pvalues <- p_values_vec
+    output$decisionMTRI <- dec_mtri
+    output$contTabs <- contingenyTabs
+    output$mulTestdec <- multest_dec
+    return(output)
+}
+
+# ------------------------------------------------------------------------------------------
+
+# ------------------------------Multiple_test__Fisher_exact_independent_test------------------------------------
+MTFStest <- function(M, labels, sizes, k_max, multTest = "Holm", s_psi = 1, s_h = 1, lb = 1, n_sts = 1000, alpha = 0.05){
+  n_hypo <- (k_max-1)
+  fpmf_vec <- rep(0, n_hypo)
+  p_values_vec <- rep(0, n_hypo)
+  contingenyTabs <- list()
+  for (i in 1:n_hypo) {
+    testFun <- FStest(M, labels, sizes, n_clust = (i+1), randomization = TRUE, clust_alg = "knwClustNo", kmax = 2*(i+1), s_psi, s_h, lb, n_sts, alpha)
+    fpmf_vec[i] <- testFun$ObservedProb
+    p_values_vec[i] <- testFun$estPvalue
+    contingenyTabs[[i]] <- testFun$obsCtyTab 
+  }
+  
+  dec_mtFS <- 0
+  if(multTest=="Holm"){
+    multest_dec <- Holm(p_values_vec,alpha)
+    if(sum(multest_dec)!=0){
+      dec_mtFS <- 1
+    }
+  }
+  else if(multTest=="BenHoch"){
+    multest_dec <- BenHoch(p_values_vec, alpha)
+    if(sum(multest_dec) != 0){
+      dec_mtFS <- 1
+    }
+  }
+  
+  output<-list()
+  
+  output$fpmfvec <- fpmf_vec
+  output$Pvalues <- p_values_vec
+  output$decisionMTFS <- dec_mtFS
+  output$contTabs <- contingenyTabs
+  output$mulTestdec <- multest_dec
+  return(output)
+}
+
 # ------------------------Aggregate_rand_index_test----------------------------------------
-ARItest <- function(M, sizes, randomization = TRUE, clust_alg = "knwClustNo", s_fn = 1, lb = 1, n_sts = 1000, alpha = 0.05){
+ARItest <- function(M, sizes, randomization = TRUE, clust_alg = "knwClustNo", kmax = 4, multTest = "Holm", s_psi = 1, s_h = 1, lb = 1, n_sts = 1000, alpha = 0.05){
   if(is.data.frame(M))
     M <- as.matrix(M)
   if(!is.numeric(M) || !is.numeric(sizes) || anyNA(M) || anyNA(sizes))
@@ -211,7 +327,7 @@ ARItest <- function(M, sizes, randomization = TRUE, clust_alg = "knwClustNo", s_
       nn <- sizes[j]
       level <- c(rep(0,mm), rep(1,nn))
       obsM <- M[c((cumS[i]+1):cumS[i+1],(cumS[j]+1):cumS[j+1]), ]
-      testFun <- RItest(obsM, labels=level, sizes = c(mm,nn), randomization, clust_alg, s_fn, lb, n_sts, alpha) 
+      testFun <- RItest(obsM, labels=level, sizes = c(mm,nn), n_clust = 2, randomization, clust_alg, kmax, s_psi, s_h, lb, n_sts, alpha) 
       aggRI <- min(aggRI,testFun$ObservedRI)
       epvalues <- c(epvalues,testFun$estPvalue)
       
@@ -253,13 +369,17 @@ ARItest <- function(M, sizes, randomization = TRUE, clust_alg = "knwClustNo", s_
   }
   lpvs <- no_clust*(no_clust-1)/2
   pvalues <- epvalues[2:(lpvs+1)]
-  criticalValues <- sapply(1:lpvs, function(i) alpha/(lpvs-i+1))
-  notequal <-  (sort(pvalues) < criticalValues)
-  orp <- as.vector(order(pvalues))
-  idx <- as.vector(which(notequal))
-  notequalpop <- orp[idx]
   hyposet <- t(combn(1:no_clust,2))
-  multipletest <- data.frame(Population = hyposet[notequalpop, ], pvalues=pvalues[notequalpop], criticalValues=criticalValues[notequalpop])
+  
+  if(multTest == "Holm"){
+    multest_dec <- Holm(pvalues,alpha)
+    multipletest <- data.frame(Population = hyposet, rejected = as.logical(multest_dec), pvalues=pvalues)
+  }
+  
+  else if(multTest == "BenHoch"){
+    multest_dec <- BenHoch(pvalues,alpha)
+    multipletest <- data.frame(Population = hyposet, rejected = as.logical(multest_dec), pvalues=pvalues)
+  }
   
   #output
   output<-list()
@@ -289,7 +409,7 @@ ARItest <- function(M, sizes, randomization = TRUE, clust_alg = "knwClustNo", s_
 # ------------------------------------------------------------------------------------------
 
 # ------------------------Aggregate_Fisher_Exact_Independence_test------------------------------
-AFEItest <- function(M, sizes, randomization = TRUE, clust_alg = "knwClustNo", s_fn = 1, lb = 1, n_sts = 1000, alpha = 0.05){
+AFStest <- function(M, sizes, randomization = TRUE, clust_alg = "knwClustNo", kmax = 4, multTest = "Holm", s_psi = 1, s_h = 1, lb = 1, n_sts = 1000, alpha = 0.05){
   if(is.data.frame(M))
     M <- as.matrix(M)
   if(!is.numeric(M) || !is.numeric(sizes) || anyNA(M) || anyNA(sizes))
@@ -303,7 +423,7 @@ AFEItest <- function(M, sizes, randomization = TRUE, clust_alg = "knwClustNo", s
     cumS[kk] <- cumS[kk-1] + sizes[kk-1]
   }
   
-  aggAFEI <- 1
+  aggAFS <- 1
   epvalues <- 0
   minrow <- rep(1,n_sts)
   
@@ -313,8 +433,8 @@ AFEItest <- function(M, sizes, randomization = TRUE, clust_alg = "knwClustNo", s
       nn <- sizes[j]
       level <- c(rep(0,mm), rep(1,nn))
       obsM <- M[c((cumS[i]+1):cumS[i+1],(cumS[j]+1):cumS[j+1]), ]
-      testFun <- FEItest(obsM, labels=level, sizes = c(mm,nn), randomization, clust_alg, s_fn, lb, n_sts, alpha) 
-      aggAFEI <- min(aggAFEI,testFun$ObservedProb)
+      testFun <- FStest(obsM, labels=level, sizes = c(mm,nn), n_clust = 2, randomization, clust_alg, kmax, s_psi, s_h, lb, n_sts, alpha) 
+      aggAFS <- min(aggAFS,testFun$ObservedProb)
       epvalues <- c(epvalues,testFun$estPvalue)
       
       fsim_pmf <- rep(0, n_sts)
@@ -329,60 +449,64 @@ AFEItest <- function(M, sizes, randomization = TRUE, clust_alg = "knwClustNo", s
   
   # AF_alpha <- as.numeric(quantile(minrow, alpha))
   AF_alpha <- sort(minrow)[floor(alpha*n_sts)]
-  dec_AFEI <- 0
-  # if(aggAFEI <= AF_alpha ){dec_AFEI <- 1}
+  dec_AFS <- 0
+  # if(aggAFS <= AF_alpha ){dec_AFS <- 1}
   
   randGamma <- 0
   if(randomization==TRUE){
     
-    if(aggAFEI< AF_alpha){
-      dec_AFEI <- 1
+    if(aggAFS< AF_alpha){
+      dec_AFS <- 1
     } 
     
-    if(aggAFEI==AF_alpha){
+    if(aggAFS==AF_alpha){
       u1 <-runif(1) 
       fs0 <- mean(minrow==AF_alpha)
       fs1 <- mean(minrow<AF_alpha)
       
       randGamma <- (alpha - fs1)/fs0     
-      if(u1 < randGamma){dec_AFEI <- 1}
+      if(u1 < randGamma){dec_AFS <- 1}
     }
   }
   else if(randomization==FALSE){
-    if(aggAFEI< AF_alpha){
-      dec_AFEI <- 1
+    if(aggAFS< AF_alpha){
+      dec_AFS <- 1
     } 
   }
   lpvs <- no_clust*(no_clust-1)/2
   pvalues <- epvalues[2:(lpvs+1)]
-  criticalValues <- sapply(1:lpvs, function(i) alpha/(lpvs-i+1))
-  notequal <-  (sort(pvalues) < criticalValues)
-  orp <- as.vector(order(pvalues))
-  idx <- as.vector(which(notequal))
-  notequalpop <- orp[idx]
   hyposet <- t(combn(1:no_clust,2))
-  multipletest <- data.frame(Population = hyposet[notequalpop, ], pvalues=pvalues[notequalpop], criticalValues=criticalValues[notequalpop])
+  
+  if(multTest == "Holm"){
+    multest_dec <- Holm(pvalues,alpha)
+    multipletest <- data.frame(Population = hyposet, rejected = as.logical(multest_dec), pvalues=pvalues)
+  }
+  
+  else if(multTest == "BenHoch"){
+    multest_dec <- BenHoch(pvalues,alpha)
+    multipletest <- data.frame(Population = hyposet, rejected = as.logical(multest_dec), pvalues=pvalues)
+  }
   
   #output
   output<-list()
-  output$AFEIStat <- aggAFEI
+  output$AFSStat <- aggAFS
   output$AFCutoff <- AF_alpha
   output$randomGamma <- randGamma
-  output$decisionAFEI <- dec_AFEI
+  output$decisionAFS <- dec_AFS
   output$multipleTest <- multipletest
   
   # if(clust_alg=="knwClustNo"){
-  #   output$AFEIStat <- aggAFEI
+  #   output$AFSStat <- aggAFS
   #   output$AFCutoff <- AF_alpha
   #   output$randomGamma<- randGamma
-  #   output$decisionAFEI <- dec_AFEI
+  #   output$decisionAFS <- dec_AFS
   #   output$multipleTest <- multipletest
   # }
   # else if(clust_alg=="estClustNo"){
-  #   output$AFEIStat <- aggAFEI
+  #   output$AFSStat <- aggAFS
   #   output$AFCutoff <- AF_alpha
   #   output$randomGamma <- randGamma
-  #   output$decisionAFEI <- dec_AFEI
+  #   output$decisionAFS <- dec_AFS
   #   output$multipleTest <- multipletest
   #   }
   return(output)

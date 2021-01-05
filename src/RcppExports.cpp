@@ -6,30 +6,32 @@
 using namespace Rcpp;
 
 // gMADD
-/*-----Modified K-means clustering algorithm with known cluster number based on MADD------*/ Rcpp::NumericVector gMADD(int s_fn, int n_clust, int lb, Rcpp::NumericMatrix M);
-RcppExport SEXP _HDLSSkST_gMADD(SEXP s_fnSEXP, SEXP n_clustSEXP, SEXP lbSEXP, SEXP MSEXP) {
+/*-----Modified K-means clustering algorithm with known cluster number based on MADD------*/ Rcpp::NumericVector gMADD(int s_psi, int s_h, int n_clust, int lb, Rcpp::NumericMatrix M);
+RcppExport SEXP _HDLSSkST_gMADD(SEXP s_psiSEXP, SEXP s_hSEXP, SEXP n_clustSEXP, SEXP lbSEXP, SEXP MSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type s_fn(s_fnSEXP);
+    Rcpp::traits::input_parameter< int >::type s_psi(s_psiSEXP);
+    Rcpp::traits::input_parameter< int >::type s_h(s_hSEXP);
     Rcpp::traits::input_parameter< int >::type n_clust(n_clustSEXP);
     Rcpp::traits::input_parameter< int >::type lb(lbSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type M(MSEXP);
-    rcpp_result_gen = Rcpp::wrap(gMADD(s_fn, n_clust, lb, M));
+    rcpp_result_gen = Rcpp::wrap(gMADD(s_psi, s_h, n_clust, lb, M));
     return rcpp_result_gen;
 END_RCPP
 }
 // gMADD_DI
-/*-----Modified K-means clustering algorithm with estimated clust number based on MADD------*/ Rcpp::NumericMatrix gMADD_DI(int s_fn, int kmax, int lb, Rcpp::NumericMatrix M);
-RcppExport SEXP _HDLSSkST_gMADD_DI(SEXP s_fnSEXP, SEXP kmaxSEXP, SEXP lbSEXP, SEXP MSEXP) {
+/*-----Modified K-means clustering algorithm with estimated clust number based on MADD------*/ Rcpp::NumericMatrix gMADD_DI(int s_psi, int s_h, int kmax, int lb, Rcpp::NumericMatrix M);
+RcppExport SEXP _HDLSSkST_gMADD_DI(SEXP s_psiSEXP, SEXP s_hSEXP, SEXP kmaxSEXP, SEXP lbSEXP, SEXP MSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type s_fn(s_fnSEXP);
+    Rcpp::traits::input_parameter< int >::type s_psi(s_psiSEXP);
+    Rcpp::traits::input_parameter< int >::type s_h(s_hSEXP);
     Rcpp::traits::input_parameter< int >::type kmax(kmaxSEXP);
     Rcpp::traits::input_parameter< int >::type lb(lbSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type M(MSEXP);
-    rcpp_result_gen = Rcpp::wrap(gMADD_DI(s_fn, kmax, lb, M));
+    rcpp_result_gen = Rcpp::wrap(gMADD_DI(s_psi, s_h, kmax, lb, M));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -46,8 +48,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_HDLSSkST_gMADD", (DL_FUNC) &_HDLSSkST_gMADD, 4},
-    {"_HDLSSkST_gMADD_DI", (DL_FUNC) &_HDLSSkST_gMADD_DI, 4},
+    {"_HDLSSkST_gMADD", (DL_FUNC) &_HDLSSkST_gMADD, 5},
+    {"_HDLSSkST_gMADD_DI", (DL_FUNC) &_HDLSSkST_gMADD_DI, 5},
     {"_HDLSSkST_rctab", (DL_FUNC) &_HDLSSkST_rctab, 1},
     {NULL, NULL, 0}
 };

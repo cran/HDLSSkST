@@ -1,12 +1,15 @@
 \name{rctab}
 \alias{rctab}
-\title{Generates an \eqn{r\times c} Contingency Table
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{ Generates an \eqn{r\times c} Contingency Table
 }
-\description{A function that generates an \eqn{r\times c} contingency table with the same marginal totals as given \eqn{r\times c} contingency table.
+\description{
+A function that generates an \eqn{r\times c} contingency table with the same marginal totals as given \eqn{r\times c} contingency table.
 }
 \usage{
 rctab(M)
 }
+%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{M}{\eqn{r\times c} contingency table
 }
@@ -18,12 +21,14 @@ generated \eqn{r\times c} contingency table
 \references{
 Cyrus R Mehta and Nitin R Patel (1983). A network algorithm for performing Fisher's exact test in rxc contingency tables, \emph{Journal of the American Statistical Association}, 78(382):427-434, doi:10.2307/2288652.
 }
-\author{ Biplab Paul, Shyamal K. De and Anil K. Ghosh
+\author{
+ Biplab Paul, Shyamal K. De and Anil K. Ghosh
 
 Maintainer: Biplab Paul<biplab.paul@niser.ac.in>
 }
+
 \examples{
-   # Generation of rxc Contingency Table:
+# Generation of rxc Contingency Table:
    set.seed(151)
    mat <- matrix(1:20,5,4, byrow = TRUE)
    rctab(mat)
@@ -35,5 +40,5 @@ Maintainer: Biplab Paul<biplab.paul@niser.ac.in>
    #[3,]    8    7   12   15
    #[4,]   18   16   13   11
    #[5,]   12   18   20   24
-}
+   }
 \keyword{ rctab function}

@@ -1,20 +1,31 @@
 \name{gMADD_DI}
 \alias{gMADD_DI}
-\title{Modified K-Means Algorithm by Using a New Dissimilarity Measure, MADD and DUNN Index
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{
+Modified K-Means Algorithm by Using a New Dissimilarity Measure, MADD and DUNN Index
 }
-\description{Performs modified K-means algorithm by using a new dissimilarity measure, called MADD and DUNN index, and provides estimated cluster (class) labels or memberships and corresponding DUNN index of the observations. 
+\description{
+Performs modified K-means algorithm by using a new dissimilarity measure, called MADD and DUNN index, and provides estimated cluster (class) labels or memberships and corresponding DUNN index of the observations.
 }
 \usage{
-gMADD_DI(s_fn, kmax, lb, M)
+gMADD_DI(s_psi, s_h, kmax, lb, M)
 }
+%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{s_fn}{function required for clustering, 1 for \eqn{1-\exp(-t)}, 2 for \eqn{\log(1+t)}, 3 for \eqn{t}
+  \item{s_psi}{
+function required for clustering, 1 for \eqn{t^2}, 2 for \eqn{1-\exp(-t)}, 3 for \eqn{\log(1+t)}, 4 for \eqn{t}
 }
-  \item{kmax}{ maximum value of total number of clusters to estimate total number of the classes in the whole observations 
+  \item{s_h}{
+function required for clustering, 1 for \eqn{\sqrt t}, 2 for \eqn{t}
 }
-  \item{lb}{each observation is partitioned into some numbers of smaller vectors of same length \eqn{lb}
+  \item{kmax}{
+maximum value of total number of clusters to estimate total number of clusters in the whole observations
 }
-  \item{M}{\eqn{n\times d} observations matrix of pooled sample, the observations should be grouped by their respective classes
+  \item{lb}{
+each observation is partitioned into some numbers of smaller vectors of same length \eqn{lb}
+}
+  \item{M}{
+\eqn{n\times d} observations matrix of pooled sample, the observations should be grouped by their respective classes
 }
 }
 \details{
@@ -26,8 +37,10 @@ a \eqn{kmax \times (n+1)} matrix of the estimated cluster (class) labels and cor
 \note{
 The result of this gMADD_DI function is a matrix. The 1st row of this matrix doesn't provide anything about estimated class labels or DUNN index of observations since the DUNN index is only defined for \eqn{k\ge 2}. The last column of this matrix represents the DUNN indexes. The estimated cluster labels of observations are calculated by finding out the corresponding row of maximum DUNN index.
 }
+
 \references{
-Biplab Paul, Shyamal K De and Anil K Ghosh (2020).  Distribution-free Exact k-sample Tests for High Dimensional Low Sample Size data Based on Clustering.
+Biplab Paul, Shyamal K De and Anil K Ghosh (2020).  Some clustering based exact distribution-free k-sample tests
+applicable to high dimension, low sample size data.
 
 Soham Sarkar and Anil K Ghosh (2019). On perfect clustering of high dimension, low sample size data, \emph{IEEE transactions on pattern analysis and machine intelligence}, doi:10.1109/TPAMI.2019.2912599.
 
@@ -51,12 +64,11 @@ Maintainer: Biplab Paul<biplab.paul@niser.ac.in>
   n_cl <- 4
   N <- n1+n2+n3+n4
   X <- as.matrix(rbind(I1,I2,I3,I4)) 
-  dvec_di_mat <-  gMADD_DI(1,2*n_cl,1,X)
+  dvec_di_mat <-  gMADD_DI(1,1,2*n_cl,1,X)
   est_no_cl <- which.max(dvec_di_mat[ ,(N+1)])
   dvec_di_mat[est_no_cl,1:N]
 
    ## outputs:
    #[1] 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3
-
-}
+   }
 \keyword{ gMADD_DI function}

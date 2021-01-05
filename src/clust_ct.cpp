@@ -1,58 +1,23 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
+double h(int i, double t);
 double psi(int i, double t);
 
 // [[Rcpp::export]]
 /*-----Modified K-means clustering algorithm with known cluster number based on MADD------*/
-Rcpp::NumericVector gMADD(int s_fn, int n_clust, int lb, Rcpp::NumericMatrix M) 
+Rcpp::NumericVector gMADD(int s_psi, int s_h, int n_clust, int lb, Rcpp::NumericMatrix M) 
 {
   int N = M.nrow(), d = M.ncol();
   int i,j,k,l;
-  double d0,min,n0,d00;
-  int nclust,m1,m2;
+  double d0,min,n0,d00,maxD,minD,WC,PC,DI;
+  int nclust,m1,m2,m11,m22;
   int change,iter;
   int B = d/lb;
   
-  double **dist,**mdist,**c,*nc,**cdist_a,**cdist_k,*cdist;
-  Rcpp::NumericVector kclust(N), clust_a(N);
-  
-  dist=(double**)malloc(N*sizeof(double*));
-  mdist=(double**)malloc(N*sizeof(double*));
-  for(i=0;i<N;i++)
-  {
-    dist[i]=(double*)malloc(N*sizeof(double));
-    mdist[i]=(double*)malloc(N*sizeof(double));
-  }
-  c=(double**)malloc(N*sizeof(double*));
-  for(i=0;i<N;i++)
-  {
-    c[i]=(double*)malloc(N*sizeof(double));
-  }
-  nc=(double*)malloc(N*sizeof(double));
-  cdist_a=(double**)malloc(N*sizeof(double*));
-  for(i=0;i<N;i++)
-  {
-    cdist_a[i]=(double*)malloc(N*sizeof(double));
-  }
-  cdist_k=(double**)malloc(N*sizeof(double*));
-  for(i=0;i<N;i++)
-  {
-    cdist_k[i]=(double*)malloc(N*sizeof(double));
-  }
-  cdist=(double*)malloc(N*sizeof(double));             
-  
-  for(i=0;i<N;i++)
-  { 
-    for(j=0;j<N;j++)
-    {
-      dist[i][j]=0.0;
-      mdist[i][j]=0.0;
-      cdist_a[i][j]=0.0;
-      cdist_k[i][j]=0.0;
-    }
-  }
-  
+  Rcpp::NumericVector kclust(N), clust_a(N), nc(n_clust), cdist(n_clust);
+  Rcpp::NumericMatrix mdist(N,N), dist(N,N), cdist_kD(n_clust, n_clust), cD(n_clust, n_clust);
+  Rcpp::NumericMatrix c(N,N), cdist_a(N,N);
   
   for(i=0;i<N-1;i++)
   {
@@ -66,10 +31,10 @@ Rcpp::NumericVector gMADD(int s_fn, int n_clust, int lb, Rcpp::NumericMatrix M)
         {
           d00=d00+(M(i, l)-M(j, l))*(M(i, l)-M(j, l));
         } 
-        d0=d0+ psi(s_fn,sqrt(d00)/((double)lb)); 
+        d0=d0+psi(s_psi,sqrt(d00)/((double)lb)); 
       }
-      dist[i][j]=d0/((double)B);
-      dist[j][i]=dist[i][j];
+      dist(i,j)=h(s_h,d0/((double)B));
+      dist(j,i)=dist(i,j);
     }
   }
   
@@ -79,23 +44,22 @@ Rcpp::NumericVector gMADD(int s_fn, int n_clust, int lb, Rcpp::NumericMatrix M)
     {
       for(k=0;k<N;k++)
       {
-        mdist[i][j]=mdist[i][j]+fabs(dist[i][k]-dist[j][k]);
+        mdist(i,j)=mdist(i,j)+fabs(dist(i,k)-dist(j,k));
       }
-      mdist[i][j]=(mdist[i][j]-2*dist[i][j])/((double) (N-2));
-      mdist[j][i]=mdist[i][j];
+      mdist(i,j)=(mdist(i,j)-2*dist(i,j))/((double) (N-2));
+      mdist(j,i)=mdist(i,j);
     }
   }
   
-  
   /* Agglomerative clustering algorithm */
-    
-    for(i=0;i<N-1;i++)
+  
+  for(i=0;i<N-1;i++)
+  {
+    for(j=i+1;j<N;j++)
     {
-      for(j=i+1;j<N;j++)
-      {
-        cdist_a[i][j]=mdist[i][j];
-      }
+      cdist_a(i,j)=mdist(i,j);
     }
+  }
   
   for(i=0;i<N;i++)
   {
@@ -108,17 +72,17 @@ Rcpp::NumericVector gMADD(int s_fn, int n_clust, int lb, Rcpp::NumericMatrix M)
     nclust=N-l;
     
     /*average linkage method*/
-      min=cdist_a[0][1];
+    min=cdist_a(0,1);
     m1=0; m2=1;
     
     for(i=0;i<nclust-1;i++)
     {
       for(j=i+1;j<nclust;j++)
       {
-        if(cdist_a[i][j]<min)
+        if(cdist_a(i,j)<min)
         {
           m1=i; m2=j;
-          min=cdist_a[i][j];
+          min=cdist_a(i,j);
         }
       }
     }
@@ -136,14 +100,14 @@ Rcpp::NumericVector gMADD(int s_fn, int n_clust, int lb, Rcpp::NumericMatrix M)
     }
     
     /*updating distances*/
-      for(i=0;i<N-1;i++)
+    for(i=0;i<N-1;i++)
+    {
+      for(j=i+1;j<N;j++)
       {
-        for(j=i+1;j<N;j++)
-        {
-          cdist_a[i][j]=0.0;
-          c[i][j]=0.0;
-        }
+        cdist_a(i,j)=0.0;
+        c(i,j)=0.0;
       }
+    }
     
     for(i=0;i<N-1;i++)
     {
@@ -153,13 +117,13 @@ Rcpp::NumericVector gMADD(int s_fn, int n_clust, int lb, Rcpp::NumericMatrix M)
         m2=clust_a[j];
         if(m1<m2)
         {
-          cdist_a[m1][m2]=cdist_a[m1][m2]+mdist[i][j];
-          c[m1][m2]=c[m1][m2]+1.0;
+          cdist_a(m1,m2)=cdist_a(m1,m2)+mdist(i,j);
+          c(m1,m2)=c(m1,m2)+1.0;
         }
         else if(m1>m2)
         {
-          cdist_a[m2][m1]=cdist_a[m2][m1]+mdist[i][j];
-          c[m2][m1]=c[m2][m1]+1.0;
+          cdist_a(m2,m1)=cdist_a(m2,m1)+mdist(i,j);
+          c(m2,m1)=c(m2,m1)+1.0;
         }
       }
     }
@@ -167,19 +131,19 @@ Rcpp::NumericVector gMADD(int s_fn, int n_clust, int lb, Rcpp::NumericMatrix M)
     {
       for(j=i+1;j<nclust;j++)
       {
-        cdist_a[i][j]=cdist_a[i][j]/c[i][j];
+        cdist_a(i,j)=cdist_a(i,j)/c(i,j);
       }
     }
     
   }
   
   /*K-means clustering algorithm*/
-    
-    for(i=0;i<N;i++)
-    {
-      kclust[i]=clust_a[i];
-      /*output of average linkage as the initial partition*/
-    }
+  
+  for(i=0;i<N;i++)
+  {
+    kclust[i]=clust_a[i];
+    /*output of average linkage as the initial partition*/
+  }
   for(i=0;i<n_clust;i++)
   {
     nc[i]=0.0;
@@ -211,7 +175,7 @@ Rcpp::NumericVector gMADD(int s_fn, int n_clust, int lb, Rcpp::NumericMatrix M)
           if(j!=i)
           {
             m2=kclust[j];
-            cdist[m2]=cdist[m2]+mdist[i][j];
+            cdist[m2]=cdist[m2]+mdist(i,j);
           }
         }
         l=m1; min=cdist[m1]/(nc[m1]-1.0);
@@ -237,17 +201,30 @@ Rcpp::NumericVector gMADD(int s_fn, int n_clust, int lb, Rcpp::NumericMatrix M)
         }
       }
     }
-  }              
+  }
+
   return kclust;              
 }
+
+/*-----h functions for MADD based modified K-means clustering algorithm-----*/
+double h(int i, double t)
+{
+  double y;
+  if(i==1){ y=sqrt(t); }
+  else if(i==2){ y=t; }
+  return y;
+}
+/*-------------------------------------------------------------------------------------------*/
+
 
 /*-----Family of continuous functions for MADD based modified K-means clustering algorithm-----*/
 double psi(int i, double t)
 {
   double y;
-  if(i==1){ y=1.0-exp(-t); }
-  else if(i==2){ y=log(1+t); }
-  else if(i==3){ y=t; }
+  if(i==1){ y=pow(t,2.0); }
+  else if(i==2){ y=1.0-exp(-t); }
+  else if(i==3){ y=log(1+t); }
+  else if(i==4){ y=t; }
   return y;
 }
 /*-------------------------------------------------------------------------------------------*/
@@ -255,56 +232,18 @@ double psi(int i, double t)
 
 // [[Rcpp::export]]
 /*-----Modified K-means clustering algorithm with estimated clust number based on MADD------*/
-Rcpp::NumericMatrix gMADD_DI(int s_fn, int kmax, int lb, Rcpp::NumericMatrix M) 
+Rcpp::NumericMatrix gMADD_DI(int s_psi, int s_h, int kmax, int lb, Rcpp::NumericMatrix M) 
 {
   int N = M.nrow(), d = M.ncol();
   int i,j,k,k1,l;
-  double d0,min,max,n0, d00;
-  int nclust,m1,m2;
+  double d0,min,n0,d00,maxD,minD;
+  int nclust, n_clust, m1, m2, m11, m22;
   int change,iter;
   int B = d/lb;
   
-  double **dist,**mdist,**c,**cdist_a,**cdist_k, *nc, *cdist;
-  int **clust_a;
-  Rcpp::NumericVector WI_k(kmax),BI_k(kmax),DI_k(kmax);
-  Rcpp::NumericMatrix kclust(kmax, N+1);
-  
-  dist=(double**)malloc(N*sizeof(double*));
-  mdist=(double**)malloc(N*sizeof(double*));
-  for(i=0;i<N;i++)
-  {
-    dist[i]=(double*)malloc(N*sizeof(double));
-    mdist[i]=(double*)malloc(N*sizeof(double));
-  }
-  c=(double**)malloc(N*sizeof(double*));
-  cdist_a=(double**)malloc(N*sizeof(double*));
-  cdist_k=(double**)malloc(N*sizeof(double*));
-  for(i=0;i<N;i++)
-  {
-    c[i]=(double*)malloc(N*sizeof(double));
-    cdist_a[i]=(double*)malloc(N*sizeof(double));
-    cdist_k[i]=(double*)malloc(N*sizeof(double));
-  }
-  clust_a=(int**)malloc(N*sizeof(int*));
-  for(i=0;i<N;i++)
-  {
-    clust_a[i]=(int*)malloc(N*sizeof(double));
-  }
-  nc=(double*)malloc(N*sizeof(double));
-  cdist=(double*)malloc(N*sizeof(double));
-
-  for(i=0;i<N;i++)
-  {
-    for(j=0;j<N;j++)
-    {
-      dist[i][j]=0.0;
-      mdist[i][j]=0.0;
-      cdist_a[i][j]=0.0; 
-	    clust_a[i][j]=0.0;
-      cdist_k[i][j]=0.0;
-    }
-  }
-
+  Rcpp::NumericVector WC(kmax),PC(kmax),DI(kmax),nc(kmax),cdist(kmax);
+  Rcpp::NumericMatrix kclust(kmax,N+1), mdist(N,N), dist(N,N), cdist_kD(kmax,kmax), cD(kmax,kmax); 
+  Rcpp::NumericMatrix c(N,N), cdist_a(N,N), clust_a(N,N);
   
   for(i=0;i<N-1;i++)
   {
@@ -316,15 +255,14 @@ Rcpp::NumericMatrix gMADD_DI(int s_fn, int kmax, int lb, Rcpp::NumericMatrix M)
         d00 = 0.0;
         for(l=k*lb;l<(k+1)*lb;l++)
         {
-          d00=d00+(M(i,l)-M(j,l))*(M(i,l)-M(j,l));
+          d00=d00+(M(i, l)-M(j, l))*(M(i, l)-M(j, l));
         } 
-        d0=d0+psi(s_fn,sqrt(d00)/((double)lb));  
+        d0=d0+psi(s_psi,sqrt(d00)/((double)lb)); 
       }
-      dist[i][j]=d0/((double)B);
-      dist[j][i]=dist[i][j];
+      dist(i,j)=h(s_h,d0/((double)B));
+      dist(j,i)=dist(i,j);
     }
   }
-  
   
   for(i=0;i<N-1;i++)
   {
@@ -332,10 +270,10 @@ Rcpp::NumericMatrix gMADD_DI(int s_fn, int kmax, int lb, Rcpp::NumericMatrix M)
     {
       for(k=0;k<N;k++)
       {
-        mdist[i][j]=mdist[i][j]+fabs(dist[i][k]-dist[j][k]);
+        mdist(i,j)=mdist(i,j)+fabs(dist(i,k)-dist(j,k));
       }
-      mdist[i][j]=(mdist[i][j]-2*dist[i][j])/((double) (N-2));
-      mdist[j][i]=mdist[i][j];
+      mdist(i,j)=(mdist(i,j)-2*dist(i,j))/((double) (N-2));
+      mdist(j,i)=mdist(i,j);
     }
   }
   
@@ -345,13 +283,13 @@ Rcpp::NumericMatrix gMADD_DI(int s_fn, int kmax, int lb, Rcpp::NumericMatrix M)
   {
     for(j=i+1;j<N;j++)
     {
-      cdist_a[i][j]=mdist[i][j];
+      cdist_a(i,j)=mdist(i,j);
     }
   }
   
   for(i=0;i<N;i++)
   {
-    clust_a[0][i]=i;
+    clust_a(0,i)=i;
     /*initial cluster where all objects are individual clusters*/
   }
   
@@ -360,34 +298,34 @@ Rcpp::NumericMatrix gMADD_DI(int s_fn, int kmax, int lb, Rcpp::NumericMatrix M)
     nclust=N-l;
     
     /*average linkage method*/
-    min=cdist_a[0][1];
+    min=cdist_a(0,1);
     m1=0; m2=1;
     
     for(i=0;i<nclust-1;i++)
     {
       for(j=i+1;j<nclust;j++)
       {
-        if(cdist_a[i][j]<min)
+        if(cdist_a(i,j)<min)
         {
           m1=i; m2=j;
-          min=cdist_a[i][j];
+          min=cdist_a(i,j);
         }
       }
     }
     
     for(i=0;i<N;i++)
     {
-      if(clust_a[l][i]<m2)
+      if(clust_a(l,i)<m2)
       {
-        clust_a[l+1][i]=clust_a[l][i];
+        clust_a(l+1,i)=clust_a(l,i);
       }
-      else if(clust_a[l][i]==m2)
+      else if(clust_a(l,i)==m2)
       {
-        clust_a[l+1][i]=m1;
+        clust_a(l+1,i)=m1;
       }
       else
       {
-        clust_a[l+1][i]=clust_a[l][i]-1;
+        clust_a(l+1,i)=clust_a(l,i)-1;
       }
     }
     
@@ -396,26 +334,26 @@ Rcpp::NumericMatrix gMADD_DI(int s_fn, int kmax, int lb, Rcpp::NumericMatrix M)
     {
       for(j=i+1;j<N;j++)
       {
-        cdist_a[i][j]=0.0;
-        c[i][j]=0.0;
+        cdist_a(i,j)=0.0;
+        c(i,j)=0.0;
       }
     }
     
     for(i=0;i<N-1;i++)
     {
-      m1=clust_a[l+1][i];
+      m1=clust_a(l+1,i);
       for(j=i+1;j<N;j++)
       {
-        m2=clust_a[l+1][j];
+        m2=clust_a(l+1,j);
         if(m1<m2)
         {
-          cdist_a[m1][m2]=cdist_a[m1][m2]+mdist[i][j];
-          c[m1][m2]=c[m1][m2]+1.0;
+          cdist_a(m1,m2)=cdist_a(m1,m2)+mdist(i,j);
+          c(m1,m2)=c(m1,m2)+1.0;
         }
         else if(m1>m2)
         {
-          cdist_a[m2][m1]=cdist_a[m2][m1]+mdist[i][j];
-          c[m2][m1]=c[m2][m1]+1.0;
+          cdist_a(m2,m1)=cdist_a(m2,m1)+mdist(i,j);
+          c(m2,m1)=c(m2,m1)+1.0;
         }
       }
     }
@@ -423,7 +361,7 @@ Rcpp::NumericMatrix gMADD_DI(int s_fn, int kmax, int lb, Rcpp::NumericMatrix M)
     {
       for(j=i+1;j<nclust;j++)
       {
-        cdist_a[i][j]=cdist_a[i][j]/c[i][j];
+        cdist_a(i,j)=cdist_a(i,j)/c(i,j);
       }
     }
   }
@@ -434,7 +372,7 @@ Rcpp::NumericMatrix gMADD_DI(int s_fn, int kmax, int lb, Rcpp::NumericMatrix M)
   {
     for(i=0;i<N;i++)
     {
-      kclust(k1-1,i)=clust_a[N-k1][i];
+      kclust(k1-1,i)=clust_a(N-k1,i);
       /*output of average linkage as the initial partition*/
     }
     for(i=0;i<k1;i++)
@@ -469,7 +407,7 @@ Rcpp::NumericMatrix gMADD_DI(int s_fn, int kmax, int lb, Rcpp::NumericMatrix M)
             if(j!=i)
             {
               m2=kclust(k1-1,j);
-              cdist[m2]=cdist[m2]+mdist[i][j];
+              cdist[m2]=cdist[m2]+mdist(i,j);
             }
           }
           
@@ -503,77 +441,89 @@ Rcpp::NumericMatrix gMADD_DI(int s_fn, int kmax, int lb, Rcpp::NumericMatrix M)
   
   
   /* computation of DUNN-index based on k-Means*/
-  for(l=0;l<kmax;l++)
+  for(l=1;l<kmax;l++)
   {
-    nclust=l+1;
+    n_clust=l+1;
     
-    for(i=0;i<nclust;i++)
+    for(i=0;i<n_clust;i++)
     {
-      for(j=i;j<nclust;j++)
+      for(j=i;j<n_clust;j++)
       {
-        cdist_k[i][j]=0.0; c[i][j]=0.0;
+        cdist_kD(i,j)=0.0; 
+        cD(i,j)=0.0;
       }
     }
+    
     for(i=0;i<N-1;i++)
     {
-      m1=kclust(l,i);
+      m11=kclust(l,i);
       for(j=i+1;j<N;j++)
       {
-        m2=kclust(l,j);
-        if(m1<=m2)
+        m22=kclust(l,j);
+        if(m11<=m22)
         {
-          cdist_k[m1][m2]=cdist_k[m1][m2]+mdist[i][j];
-          c[m1][m2]=c[m1][m2]+1.0;
+          cdist_kD(m11,m22)=cdist_kD(m11,m22)+mdist(i,j);
+          cD(m11,m22)=cD(m11,m22)+1.0;
         }
         else
         {
-          cdist_k[m2][m1]=cdist_k[m2][m1]+mdist[i][j];
-          c[m2][m1]=c[m2][m1]+1.0;
+          cdist_kD(m22,m11)=cdist_kD(m22,m11)+mdist(i,j);
+          cD(m22,m11)=cD(m22,m11)+1.0;
         }
       }
     }
-    for(i=0;i<nclust;i++)
+    for(i=0;i<n_clust;i++)
     {
-      if(c[i][i]>0)
+      if(cD(i,i)>0)
       {
-        cdist_k[i][i]=cdist_k[i][i]/c[i][i];
+        cdist_kD(i,i)=cdist_kD(i,i)/cD(i,i);
       }
       else
       {
-        cdist_k[i][i]=0.0;
+        cdist_kD(i,i)=0.0;
       }
     }
-    max=cdist_k[0][0];
-    for(i=0;i<nclust;i++)
+    
+    for(i=0;i<(n_clust-1);i++)
     {
-      if(cdist_k[i][i]>max)
+      for(j=i+1;j<n_clust;j++)
       {
-        max=cdist_k[i][i];
+        cdist_kD(i,j)=cdist_kD(i,j)/cD(i,j);
       }
     }
-    WI_k[nclust-1]=max;
-    min=cdist_k[0][1]/c[0][1];
-    for(i=0;i<nclust-1;i++)
+    
+    maxD=cdist_kD(0,0);
+    for(i=0;i<n_clust;i++)
     {
-      for(j=i+1;j<nclust;j++)
+      if(cdist_kD(i,i)>maxD)
       {
-        cdist_k[i][j]=cdist_k[i][j]/c[i][j];
-        if(cdist_k[i][j]<min)
+        maxD=cdist_kD(i,i);
+      }
+    }
+    WC[n_clust-1]=maxD;
+    
+    minD=cdist_kD(0,1);
+    for(i=0;i<(n_clust-1);i++)
+    {
+      for(j=i+1;j<n_clust;j++)
+      {
+        if(cdist_kD(i,j)<minD)
         {
-          min=cdist_k[i][j];
+          minD=cdist_kD(i,j);
         }
       }
     }
-    BI_k[nclust-1]=min;
+    PC[n_clust-1]=minD;
     
   }
   
   for(i=1;i<kmax;i++)
   {
-    DI_k[i]=BI_k[i]/WI_k[i];
+    DI[i]=PC[i]/WC[i];
   }
   
-  kclust(_,N) = DI_k;
+  kclust(_,N) = DI;
+  
   return kclust;
 }
 
