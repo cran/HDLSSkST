@@ -29,7 +29,7 @@ Yoav Benjamini and Yosef Hochberg (1995). Controlling the false discovery rate: 
 }
 \author{ Biplab Paul, Shyamal K. De and Anil K. Ghosh
 
-Maintainer: Biplab Paul<biplab.paul@niser.ac.in>
+Maintainer: Biplab Paul<paul.biplab497@gmail.com>
 }
 \examples{
    # Benjamini-Hochbergs step-up-procedure:

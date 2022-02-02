@@ -29,7 +29,7 @@ William M Rand (1971). Objective criteria for the evaluation of clustering metho
 }
 \author{ Biplab Paul, Shyamal K. De and Anil K. Ghosh
 
-Maintainer: Biplab Paul<biplab.paul@niser.ac.in>
+Maintainer: Biplab Paul<paul.biplab497@gmail.com>
 }
 \examples{
    # Measures of dissimilarity:

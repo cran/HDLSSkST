@@ -29,7 +29,7 @@ Sture Holm (1979). A simple sequentially rejective multiple test procedure, \emp
 }
 \author{ Biplab Paul, Shyamal K. De and Anil K. Ghosh
 
-Maintainer: Biplab Paul<biplab.paul@niser.ac.in>
+Maintainer: Biplab Paul<paul.biplab497@gmail.com>
 }
 \examples{
    # Holm's step down procedure:

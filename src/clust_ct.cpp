@@ -223,8 +223,9 @@ double psi(int i, double t)
   double y;
   if(i==1){ y=pow(t,2.0); }
   else if(i==2){ y=1.0-exp(-t); }
-  else if(i==3){ y=log(1+t); }
-  else if(i==4){ y=t; }
+  else if(i==3){ y=1.0-exp(-pow(t,2.0)); }
+  else if(i==4){ y=log(1+t); }
+  else if(i==5){ y=t; }
   return y;
 }
 /*-------------------------------------------------------------------------------------------*/

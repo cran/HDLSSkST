@@ -10,11 +10,11 @@ Testing homogeneity of k (\eqn{\geq 2}) multivariate distributions is a classica
 \author{
 Biplab Paul, Shyamal K. De and Anil K. Ghosh
 
-Maintainer: Biplab Paul<biplab.paul@niser.ac.in>
+Maintainer: Biplab Paul<paul.biplab497@gmail.com>
 }
 \references{
-Biplab Paul, Shyamal K De and Anil K Ghosh (2020).  Some clustering based exact distribution-free k-sample tests
-applicable to high dimension, low sample size data.
+Biplab Paul, Shyamal K De and Anil K Ghosh (2021).  Some clustering based exact distribution-free k-sample tests
+applicable to high dimension, low sample size data, \emph{Journal of Multivariate Analysis}, doi:10.1016/j.jmva.2021.104897.
 
 Soham Sarkar and Anil K Ghosh (2019). On perfect clustering of high dimension, low sample size data, \emph{IEEE transactions on pattern analysis and machine intelligence}, doi:10.1109/TPAMI.2019.2912599.
 

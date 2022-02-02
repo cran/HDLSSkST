@@ -35,7 +35,7 @@ logical; if TRUE (default), randomization test and FALSE, non-randomization test
 maximum value of total number of clusters to estimate total number of clusters in the whole observations, default: \code{2*n_clust}
 }
   \item{s_psi}{
-function required for clustering, 1 for \eqn{t^2}, 2 for \eqn{1-\exp(-t)}, 3 for \eqn{\log(1+t)}, 4 for \eqn{t}
+function required for clustering, 1 for \eqn{t^2}, 2 for \eqn{1-\exp(-t)}, 3 for \eqn{1-\exp(-t^2)}, 4 for \eqn{\log(1+t)}, 5 for \eqn{t}
 }
   \item{s_h}{
 function required for clustering, 1 for \eqn{\sqrt t}, 2 for \eqn{t}
@@ -64,14 +64,14 @@ numeric, confidence level \eqn{\alpha}, default: \eqn{0.05}
   \item{estClustNo}{total number of the estimated classes}
 }
 \references{
-Biplab Paul, Shyamal K De and Anil K Ghosh (2020).  Some clustering based exact distribution-free k-sample tests
-applicable to high dimension, low sample size data.
+Biplab Paul, Shyamal K De and Anil K Ghosh (2021).  Some clustering based exact distribution-free k-sample tests
+applicable to high dimension, low sample size data, \emph{Journal of Multivariate Analysis}, doi:10.1016/j.jmva.2021.104897.
 
 Cyrus R Mehta and Nitin R Patel (1983). A network algorithm for performing Fisher's exact test in rxc contingency tables, \emph{Journal of the American Statistical Association}, 78(382):427-434, doi:10.2307/2288652.
 }
 \author{ Biplab Paul, Shyamal K. De and Anil K. Ghosh
 
-Maintainer: Biplab Paul<biplab.paul@niser.ac.in>
+Maintainer: Biplab Paul<paul.biplab497@gmail.com>
 }
 \examples{
    # muiltivariate normal distribution:

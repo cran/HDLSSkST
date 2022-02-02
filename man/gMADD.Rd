@@ -13,7 +13,7 @@ gMADD(s_psi, s_h, n_clust, lb, M)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{s_psi}{
-function required for clustering, 1 for \eqn{t^2}, 2 for \eqn{1-\exp(-t)}, 3 for \eqn{\log(1+t)}, 4 for \eqn{t}
+function required for clustering, 1 for \eqn{t^2}, 2 for \eqn{1-\exp(-t)}, 3 for \eqn{1-\exp(-t^2)}, 4 for \eqn{\log(1+t)}, 5 for \eqn{t}
 }
   \item{s_h}{
 function required for clustering, 1 for \eqn{\sqrt t}, 2 for \eqn{t}
@@ -32,15 +32,15 @@ each observation is partitioned into some numbers of smaller vectors of same len
 a vector of length n of estimated cluster (class) labels of observations
 }
 \references{
-Biplab Paul, Shyamal K De and Anil K Ghosh (2020). Some clustering based exact distribution-free k-sample tests
-applicable to high dimension, low sample size data.
+Biplab Paul, Shyamal K De and Anil K Ghosh (2021).  Some clustering based exact distribution-free k-sample tests
+applicable to high dimension, low sample size data, \emph{Journal of Multivariate Analysis}, doi:10.1016/j.jmva.2021.104897.
 
 Soham Sarkar and Anil K Ghosh (2019). On perfect clustering of high dimension, low sample size data, \emph{IEEE transactions on pattern analysis and machine intelligence}, doi:10.1109/TPAMI.2019.2912599.
 
 }
 \author{ Biplab Paul, Shyamal K. De and Anil K. Ghosh
 
-Maintainer: Biplab Paul<biplab.paul@niser.ac.in>
+Maintainer: Biplab Paul<paul.biplab497@gmail.com>
 }
 
 \examples{

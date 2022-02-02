@@ -32,7 +32,7 @@ maximum value of total number of clusters to estimate total number of clusters f
 \code{"HOlm"}(default) or \code{"BenHoch"}; different multiple tests
 }
   \item{s_psi}{
-function required for clustering, 1 for \eqn{t^2}, 2 for \eqn{1-\exp(-t)}, 3 for \eqn{\log(1+t)}, 4 for \eqn{t}
+function required for clustering, 1 for \eqn{t^2}, 2 for \eqn{1-\exp(-t)}, 3 for \eqn{1-\exp(-t^2)}, 4 for \eqn{\log(1+t)}, 5 for \eqn{t}
 }
   \item{s_h}{
 function required for clustering, 1 for \eqn{\sqrt t}, 2 for \eqn{t}
@@ -58,8 +58,8 @@ numeric, confidence level \eqn{\alpha}, default: \eqn{0.05}
   \item{multipleTest}{indicates where two populations are different according to multiple tests}
 }
 \references{
-Biplab Paul, Shyamal K De and Anil K Ghosh (2020).  Some clustering based exact distribution-free k-sample tests
-applicable to high dimension, low sample size data.
+Biplab Paul, Shyamal K De and Anil K Ghosh (2021).  Some clustering based exact distribution-free k-sample tests
+applicable to high dimension, low sample size data, \emph{Journal of Multivariate Analysis}, doi:10.1016/j.jmva.2021.104897.
 
 William M Rand (1971). Objective criteria for the evaluation of clustering methods, \emph{Journal of the American Statistical association}, 66(336):846-850, doi:10.1080/01621459.1971.10482356.
 
@@ -69,7 +69,7 @@ Yoav Benjamini and Yosef Hochberg (1995). Controlling the false discovery rate: 
 }
 \author{ Biplab Paul, Shyamal K. De and Anil K. Ghosh
 
-Maintainer: Biplab Paul<biplab.paul@niser.ac.in>
+Maintainer: Biplab Paul<paul.biplab497@gmail.com>
 }
 \examples{
   # muiltivariate normal distribution:
